@@ -124,38 +124,62 @@ namespace YazılımYapım
             ShowQuestion(currentQuestionIndex);
         }
         private void ShowQuestion(int index)
+{
+    if (index < 0 || index >= examWords.Count) return;
+
+    
+    pictureBox1.Image = null;
+
+    
+    Word w = examWords[index];
+    Sinavlbl.Text = $"\"{w.EngWordName}\" kelimesinin Türkçe karşılığı nedir?";
+
+    
+    if (!string.IsNullOrEmpty(w.Picture))
+    {
+        
+        string picturePath = w.Picture;
+
+        
+
+        if (File.Exists(picturePath))
         {
-            if (index < 0 || index >= examWords.Count) return;
-
-            Word w = examWords[index];
-            Sinavlbl.Text = $"\"{w.EngWordName}\"";
-
-            string correctAnswer = w.TurWordName;
-            List<string> wrongs = _wordProvider.GetRandomWrongTurkishWords(3, w.ID, null);
-            while (wrongs.Count < 3)
-                wrongs.Add(" ");
-
-            List<string> options = new List<string> { correctAnswer }
-                                        .Concat(wrongs)
-                                        .OrderBy(x => Guid.NewGuid())
-                                        .ToList();
-
-            btn1.Text = options[0]; btn1.Tag = (options[0] == correctAnswer);
-            btn2.Text = options[1]; btn2.Tag = (options[1] == correctAnswer);
-            btn3.Text = options[2]; btn3.Tag = (options[2] == correctAnswer);
-            btn4.Text = options[3]; btn4.Tag = (options[3] == correctAnswer);
-
-            foreach (var b in new[] { btn1, btn2, btn3, btn4 })
+            try
             {
-                
-                b.Enabled = true;
-                b.UseVisualStyleBackColor = true;
-                b.ForeColor = Color.Black;
+                using (var fs = new FileStream(picturePath, FileMode.Open, FileAccess.Read))
+                    pictureBox1.Image = Image.FromStream(fs);
             }
-
-            lbldogru.Text = $"Doğru {correctCount}";
-            lblyanlis.Text = $"Yanlış {wrongCount}";
+            catch
+            {
+                pictureBox1.Image = null;
+            }
         }
+    }
+
+    
+    string correctAnswer = w.TurWordName;
+    var wrongs = _wordProvider.GetRandomWrongTurkishWords(3, w.ID, null);
+    while (wrongs.Count < 3) wrongs.Add(" ");
+
+    var options = new List<string> { correctAnswer }
+                      .Concat(wrongs)
+                      .OrderBy(x => Guid.NewGuid()).ToList();
+
+    btn1.Text = options[0]; btn1.Tag = (options[0] == correctAnswer);
+    btn2.Text = options[1]; btn2.Tag = (options[1] == correctAnswer);
+    btn3.Text = options[2]; btn3.Tag = (options[2] == correctAnswer);
+    btn4.Text = options[3]; btn4.Tag = (options[3] == correctAnswer);
+
+    foreach (var b in new[] { btn1, btn2, btn3, btn4 })
+    {
+        b.Enabled = true;
+        b.UseVisualStyleBackColor = true;
+        b.ForeColor = Color.Black;
+    }
+
+    lbldogru.Text = $"Doğru {correctCount}";
+    lblyanlis.Text = $"Yanlış {wrongCount}";
+}
         private void OptionButton_Click(object sender, EventArgs e)
         {
             
